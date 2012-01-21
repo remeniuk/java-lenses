@@ -13,21 +13,20 @@ public class PersonZipCodeExample {
 
     public static void main(String[] args) {
 
-        Lens<Person, Address> personAddressLens = lens(
-                new Function<Person, Address>() {
-                    @Override
-                    public Address apply(@Nullable Person person) {
-                        return person.getAddress();
-                    }
-                },
-                new Function2<Person, Address, Person>() {
-                    @Override
-                    public Person apply(Person person, Address address) {
-                        return new Person(person.getFirstName(), person.getLastName(), address);
-                    }
-                }
-        );
+        // you can create a lens overriding set/get methods
+        Lens<Person, Address> personAddressLens = new Lens<Person, Address>() {
+            @Override
+            public Address get(@Nullable Person person) {
+                return person.getAddress();
+            }
 
+            @Override
+            public Person set(Person person, Address address) {
+                return new Person(person.getFirstName(), person.getLastName(), address);
+            }
+        };
+
+        // or passing function objects
         Lens<Address, Integer> addressZipCodeLens = lens(
                 new Function<Address, Integer>() {
                     @Override
@@ -47,7 +46,7 @@ public class PersonZipCodeExample {
 
         Lens<Person, Integer> personZipCodeLens = personAddressLens.andThen(addressZipCodeLens);
 
-        personZipCodeLens.set.apply(person, personZipCodeLens.get.apply(person) + 1);
+        personZipCodeLens.set(person, personZipCodeLens.get(person) + 1);
 
     }
 

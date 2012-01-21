@@ -11,32 +11,44 @@ import javax.annotation.Nullable;
  */
 public class Lens<A, B> implements Function<A, B> {
 
-    public final Function<A, B> get;
-    public final Function2<A, B, A> set;
+    public Function<A, B> fget;
+    public Function2<A, B, A> fset;
 
-    public Lens(Function<A, B> get, Function2<A, B, A> set) {
-        this.get = get;
-        this.set = set;
+    public Lens() {
+
+    }
+
+    public Lens(Function<A, B> fget, Function2<A, B, A> fset) {
+        this.fget = fget;
+        this.fset = fset;
+    }
+
+    public B get(A a) {
+        return fget.apply(a);
+    }
+
+    public A set(A a, B b) {
+        return fset.apply(a, b);
     }
 
     @Override
     public B apply(@Nullable A a) {
-        return get.apply(a);
+        return get(a);
     }
 
     public A updated(A whole, B part) {
-        return set.apply(whole, part);
+        return set(whole, part);
     }
 
     public A mod(A a, Function<B, B> f) {
-        return set.apply(a, f.apply(apply(a)));
+        return set(a, f.apply(apply(a)));
     }
 
     public <C> Lens<C, B> compose(final Lens<C, A> that) {
         return new Lens<C, B>(new Function<C, B>() {
             @Override
             public B apply(@Nullable C c) {
-                return get.apply(that.apply(c));
+                return get(that.apply(c));
             }
         }, new Function2<C, B, C>() {
             @Override
@@ -44,7 +56,7 @@ public class Lens<A, B> implements Function<A, B> {
                 return that.mod(c, new Function<A, A>() {
                     @Override
                     public A apply(@Nullable A a) {
-                        return set.apply(a, b);
+                        return set(a, b);
                     }
                 });
             }
